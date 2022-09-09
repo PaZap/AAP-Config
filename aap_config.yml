@@ -1,0 +1,71 @@
+apiVersion: automationcontroller.ansible.com/v1beta1
+kind: AutomationController
+metadata:
+  name: aap #Name of the automation controller
+  namespace: tower # Update the namespace where AAP is being installed.
+spec:
+  admin_password_secret: admin #Provide the name of the admin secret created earlier.
+  replicas: 1  #Provide the no of controller repliacs to be started
+  secret_key_secret: ocp_secret_key #Provide the secret key secret created earlier.
+  postgres_configuration_secret: pgpass #Provide the postgres db secret created earlier.
+  route_host: controller.apps.ocp4.example.com  #Provide the existing tower url. Do not provide https://
+  #route_tls_secret: tls_secret_name #Uncomment and provide the tls secret name if you are using signed certs for tower.
+  create_preload_data: false
+  route_tls_termination_mechanism: Edge
+  garbage_collect_secrets: false
+  ingress_type: Route
+  loadbalancer_port: 80
+  image_pull_policy: IfNotPresent
+  projects_storage_size: 8Gi
+  projects_storage_access_mode: ReadWriteMany
+  projects_persistence: false
+  task_privileged: false
+  admin_user: admin
+  loadbalancer_protocol: http
+  nodeport_port: 30080
+  ee_resource_requirements:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+  task_resource_requirements:
+    limits:
+      cpu: 800m
+      memory: 2Gi
+    requests:
+      cpu: 100m
+      memory: 1Gi
+  web_resource_requirements:
+    requests:
+      cpu: 800m
+      memory: 2Gi
+  topology_spread_constraints: |
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: "ScheduleAnyway"
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: "aap" # must match name of this AutomationController
+  extra_settings:
+    - setting: SYSTEM_TASK_FORKS_MEM
+      value: 100
+    - setting: JOB_WAITING_GRACE_PERIOD
+      value: 3600
+    - setting: SESSION_COOKIE_SECURE
+      value: true
+    - setting: CSRF_COOKIE_SECURE
+      value: true
+    - setting: CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE
+      value: 10
+    - setting: CLUSTER_NODE_HEARTBEAT_PERIOD
+      value: 60
+    - setting: DISPATCHER_DB_DOWNTOWN_TOLLERANCE
+      value: 300
+    - setting: AUTH_PASSWORD_VALIDATORS
+      value:
+        - NAME: >-
+            django.contrib.auth.password_validation.UserAttributeSimilarityValidator
+        - NAME: django.contrib.auth.password_validation.MinimumLengthValidator
+          OPTIONS:
+            min_length: 15
+        - NAME: django.contrib.auth.password_validation.CommonPasswordValidator
+        - NAME: django.contrib.auth.password_validation.NumericPasswordValidator
