@@ -5,7 +5,7 @@ metadata:
   namespace: tower # Update the namespace where AAP is being installed.
 spec:
   admin_password_secret: admin #Provide the name of the admin secret created earlier.
-  replicas: 1  #Provide the no of controller repliacs to be started
+  replicas: 2  #Provide the no of controller repliacs to be started
   secret_key_secret: ocp_secret_key #Provide the secret key secret created earlier.
   postgres_configuration_secret: pgpass #Provide the postgres db secret created earlier.
   route_host: controller.apps.ocp4.example.com  #Provide the existing tower url. Do not provide https://
